@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -7,6 +7,10 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 
 const Shop = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const products = useSelector((state) => state.products.value);
   const productStatus = useSelector((state) => state.products.status);
   const [sortValue, setSortValue] = useState('dateNewest');
@@ -31,18 +35,14 @@ const Shop = () => {
         ? product
         : null
     )
-    .filter((currentElement) => {
-      if (applyPriceFilter) {
-        if (
-          parseInt(currentElement.price) >= priceSet.min &&
-          parseInt(currentElement.price) <= priceSet.max
-        ) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    })
+    .filter((currentElement) =>
+      applyPriceFilter
+        ? (parseInt(currentElement.price) >= priceSet.min ||
+            priceSet.min === '') &&
+          (parseInt(currentElement.price) <= priceSet.max ||
+            priceSet.max === '')
+        : currentElement
+    )
     .sort((productA, productB) => {
       switch (sortValue) {
         case 'nameA':
@@ -72,7 +72,7 @@ const Shop = () => {
           return productA.price - productB.price;
 
         default:
-          return;
+          return 0;
       }
     })
     .map((product) => <ProductCard product={product} key={product.id} />);
@@ -87,7 +87,7 @@ const Shop = () => {
         <div className="row text-center mb-5">
           <h1 className="my-5">Shop</h1>
 
-          <div className="col-lg-3 text-start px-5">
+          <div className="col-lg-3 text-start">
             <FilterColumn
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
@@ -96,12 +96,12 @@ const Shop = () => {
               setApplyPriceFilter={setApplyPriceFilter}
             />
           </div>
-          <div className="col-lg-9">
+          <div className="col-lg-9 container">
             <div className="products">
               {products && (
                 <main>
-                  <div className="d-flex justify-content-between align-items-center px-4">
-                    <p className="fs-6 mb-0">
+                  <div className="d-flex justify-content-between align-items-center mt-4 mt-lg-0">
+                    <p className="fs-6 mb-0 ms-4 ">
                       {filterAndSortedProducts.length}{' '}
                       {filterAndSortedProducts.length === 1
                         ? 'Result'
@@ -134,7 +134,7 @@ const Shop = () => {
                   </div>
                   <div className="pb-5">
                     {filterAndSortedProducts.length > 0 ? (
-                      <div className="row center-section row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-4 g-5 mx-auto">
+                      <div className="row center-section row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-5 mx-auto">
                         {filterAndSortedProducts}
                       </div>
                     ) : (
